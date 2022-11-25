@@ -1,65 +1,19 @@
 import { ReactElement, useState } from "react"
 import range from "lodash/range"
+import {
+  GameNoneCells,
+  GameLCells,
+  GameHorizontalCells,
+  GameVerticalCells,
+  GameCornersCells,
+  GameFullCells,
+  GameDiagonalCells,
+  GameXCells,
+} from "../../constants"
+import { BingoMarkedCells, GameMode } from "../../definitions"
 
 interface BingoNewGameProps {
   onSelect: () => void
-}
-
-enum GameMode {
-  NONE,
-  L,
-  HORIZONTAL,
-  VERTICAL,
-  CORNERS,
-  FULL,
-}
-
-const GameNoneCells: { [key: string]: boolean[] } = {
-  B: range(1, 6).map((_) => true),
-  I: [false, false, false, false, false],
-  N: [false, false, false, false, false],
-  G: [false, false, false, false, false],
-  O: [false, false, false, false, false],
-}
-
-const GameLCells: { [key: string]: boolean[] } = {
-  B: range(1, 6).map((_) => true),
-  I: [false, false, false, false, true],
-  N: [false, false, false, false, true],
-  G: [false, false, false, false, true],
-  O: [false, false, false, false, true],
-}
-
-const GameHorizontalCells: { [key: string]: boolean[] } = {
-  B: [false, false, false, false, true],
-  I: [false, false, false, false, true],
-  N: [false, false, false, false, true],
-  G: [false, false, false, false, true],
-  O: [false, false, false, false, true],
-}
-
-const GameVerticalCells: { [key: string]: boolean[] } = {
-  B: range(1, 6).map((_) => true),
-  I: [false, false, false, false, false],
-  N: [false, false, false, false, false],
-  G: [false, false, false, false, false],
-  O: [false, false, false, false, false],
-}
-
-const GameCornersCells: { [key: string]: boolean[] } = {
-  B: [true, false, false, false, true],
-  I: [false, false, false, false, false],
-  N: [false, false, false, false, false],
-  G: [false, false, false, false, false],
-  O: [true, false, false, false, true],
-}
-
-const GameFullCells: { [key: string]: boolean[] } = {
-  B: range(1, 6).map((_) => true),
-  I: range(1, 6).map((_) => true),
-  N: range(1, 6).map((_) => true),
-  G: range(1, 6).map((_) => true),
-  O: range(1, 6).map((_) => true),
 }
 
 export default function BingoNewGame({ onSelect }: BingoNewGameProps) {
@@ -79,6 +33,12 @@ export default function BingoNewGame({ onSelect }: BingoNewGameProps) {
       case GameMode.CORNERS:
         setMarked(GameCornersCells)
         break
+      case GameMode.DIAGONAL:
+        setMarked(GameDiagonalCells)
+        break
+      case GameMode.X:
+        setMarked(GameXCells)
+        break
       case GameMode.FULL:
         setMarked(GameFullCells)
         break
@@ -90,43 +50,36 @@ export default function BingoNewGame({ onSelect }: BingoNewGameProps) {
   }
 
   return (
-    <div className="w-100 h-100 bg-white flex flex-col mb-12">
-      <div className="flex flex-row mb-12">
-        <button
-          className="mr-8 bg-blue-600 rounded-lg font-semibold text-white px-4 py-2"
-          onClick={() => selectGame(GameMode.L)}
-        >
-          Jugar en L
-        </button>
-        <button
-          className="mr-8 bg-blue-600 rounded-lg font-semibold text-white px-4 py-2"
-          onClick={() => selectGame(GameMode.HORIZONTAL)}
-        >
-          Jugar en Horizontal
-        </button>
-        <button
-          className="mr-8 bg-blue-600 rounded-lg font-semibold text-white px-4 py-2"
-          onClick={() => selectGame(GameMode.VERTICAL)}
-        >
-          Jugar en Vertical
-        </button>
-        <button
-          className="mr-8 bg-blue-600 rounded-lg font-semibold text-white px-4 py-2"
-          onClick={() => selectGame(GameMode.CORNERS)}
-        >
-          Jugar en Cuatro esquinas
-        </button>
-        <button
-          className="mr-8 bg-blue-600 rounded-lg font-semibold text-white px-4 py-2"
-          onClick={() => selectGame(GameMode.FULL)}
-        >
-          Jugar en Completa
-        </button>
+    <div className="w-full min-h-full flex flex-col mb-12 pl-8 bg-green-800">
+      <div className="w-full flex flex-row justify-center py-4">
+        <SelectGameMode onSelect={selectGame} />
       </div>
       <div>
-        <Game marked={marked} />
+        <Game variants={marked} />
       </div>
     </div>
+  )
+}
+
+interface SelectGameModeProps {
+  onSelect: (gameMode: GameMode) => void
+}
+
+const SelectGameMode = ({ onSelect }: SelectGameModeProps) => {
+  return (
+    <select
+      className="bg-white py-1 px-4 rounded-md"
+      onChange={(evt) => onSelect(parseInt(evt.target.value))}
+    >
+      <option value={GameMode.NONE}>Seleccionar Modo de Juego</option>
+      <option value={GameMode.L}>Jugar en L</option>
+      <option value={GameMode.HORIZONTAL}>Jugar en Horizontal</option>
+      <option value={GameMode.VERTICAL}>Jugar en Vertical</option>
+      <option value={GameMode.CORNERS}>Jugar en Cuatro esquinas</option>
+      <option value={GameMode.DIAGONAL}>Jugar en Diagonal</option>
+      <option value={GameMode.X}>Jugar en X</option>
+      <option value={GameMode.FULL}>Jugar en Completa</option>
+    </select>
   )
 }
 
@@ -152,7 +105,7 @@ interface TableCellProps {
 const TableCell = ({ children, marked }: TableCellProps) => {
   return (
     <div
-      className={`w-10 h-10 rounded-full justify-center items-center flex border-4 ${
+      className={`w-8 h-8 rounded-full justify-center items-center flex border-4 mr-2 mb-2 ${
         marked ? "bg-green-600" : ""
       }`}
     >
@@ -160,38 +113,55 @@ const TableCell = ({ children, marked }: TableCellProps) => {
     </div>
   )
 }
+interface GameLetterCellProps {
+  children: string
+}
+
+const GameLetterCell = ({ children }: GameLetterCellProps) => {
+  return (
+    <div className="w-8 h-8 rounded-full justify-center items-center bg-red-800 text-white border-yellow-400 flex border-4 mr-2 mb-2">
+      {children}
+    </div>
+  )
+}
+
+interface GameVariantProps {
+  marked: BingoMarkedCells
+}
+
+export const GameVariant = ({ marked }: GameVariantProps) => {
+  return (
+    <div className="flex items-center justify-center">
+      <div className="mb-6 border-2 p-4 border-gray-600 rounded-xl bg-white">
+        <div className="w-full flex flex-row border-b-2 boder-gray-600 mb-2">
+          <GameLetterCell>B</GameLetterCell>
+          <GameLetterCell>I</GameLetterCell>
+          <GameLetterCell>N</GameLetterCell>
+          <GameLetterCell>G</GameLetterCell>
+          <GameLetterCell>0</GameLetterCell>
+        </div>
+        {range(1, 6).map((row, i) => (
+          <TableRow key={row}>
+            {Object.keys(cells).map((letter, index) => (
+              <TableCell key={index} marked={marked[letter][i]}>
+                X
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 interface GameProps {
-  marked: { [key: string]: boolean[] }
+  variants: BingoMarkedCells[]
 }
-const Game = ({ marked }: GameProps) => {
+const Game = ({ variants }: GameProps) => {
   return (
-    <div className="w-full">
-      <div className="w-100 flex flex-row">
-        <div className="w-10 h-10 rounded-full justify-center items-center bg-yellow-600 flex border-4">
-          B
-        </div>
-        <div className="w-10 h-10 rounded-full justify-center items-center bg-yellow-600 flex border-4">
-          I
-        </div>
-        <div className="w-10 h-10 rounded-full justify-center items-center bg-yellow-600 flex border-4">
-          N
-        </div>
-        <div className="w-10 h-10 rounded-full justify-center items-center bg-yellow-600 flex border-4">
-          G
-        </div>
-        <div className="w-10 h-10 rounded-full justify-center items-center bg-yellow-600 flex border-4">
-          0
-        </div>
-      </div>
-      {range(1, 6).map((row, i) => (
-        <TableRow key={row}>
-          {Object.keys(cells).map((letter, index) => (
-            <TableCell key={index} marked={marked[letter][i]}>
-              X
-            </TableCell>
-          ))}
-        </TableRow>
+    <div className="w-full grid grid-cols-2">
+      {variants.map((marked) => (
+        <GameVariant marked={marked} />
       ))}
     </div>
   )

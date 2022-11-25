@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
-import BingoTableRow from "../../components/BingoTableRow"
-import { rows as initRows } from "../../definitions"
+import BingoTable from "../../components/BingoTable"
+import { rows as initRows } from "../../constants"
 import BingoNewGame from "../BingoNewGame"
 
-export default function BingoTable() {
+export default function BingoViewer() {
   const [rows, setRows] = useState(initRows)
 
   useEffect(() => {
@@ -13,11 +13,9 @@ export default function BingoTable() {
   }, [rows])
 
   return (
-    <div className="w-100 flex flex-col">
+    <div className="w-full min-h-full flex flex-row items-stretch">
       <BingoNewGame onSelect={() => setRows([])} />
-      {rows.map((row) => (
-        <BingoTableRow key={row.letter} row={row} />
-      ))}
+      <BingoTable rows={rows} />
     </div>
   )
 }
