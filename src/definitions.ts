@@ -1,5 +1,3 @@
-import range from "lodash/range"
-
 export type BingoNumber = {
   value: number
   marked: boolean

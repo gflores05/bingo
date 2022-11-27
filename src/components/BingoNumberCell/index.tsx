@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { BingoNumber } from '../../definitions'
 
 interface BingoNumberProps {

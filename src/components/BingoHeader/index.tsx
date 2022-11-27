@@ -2,6 +2,7 @@ export default function BingoHeader() {
   return (
     <header className="w-full flex flex-row justify-center items-center text-center bg-red-800 py-4">
       <img
+      alt="logo"
         className="max-w-full"
         width={70}
         src={require("../../assets/logo.png")}

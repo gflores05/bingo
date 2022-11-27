@@ -38,7 +38,7 @@ export default function BingoViewer() {
       setGameMode(data['type'] as GameMode)
       setValues(data as { [key: string]: boolean[] })
     })
-  }, [])
+  }, [db])
 
   return (
     <div className='w-full min-h-full flex flex-row items-stretch'>
