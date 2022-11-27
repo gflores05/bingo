@@ -1,5 +1,5 @@
-import { ReactElement, useState } from "react"
-import range from "lodash/range"
+import { ReactElement, useEffect, useState } from 'react'
+import range from 'lodash/range'
 import {
   GameNoneCells,
   GameLCells,
@@ -9,17 +9,17 @@ import {
   GameFullCells,
   GameDiagonalCells,
   GameXCells,
-} from "../../constants"
-import { BingoMarkedCells, GameMode } from "../../definitions"
+} from '../../constants'
+import { BingoMarkedCells, GameMode } from '../../definitions'
 
 interface BingoNewGameProps {
-  onSelect: () => void
+  gameMode: GameMode
 }
 
-export default function BingoNewGame({ onSelect }: BingoNewGameProps) {
+export default function BingoNewGame({ gameMode }: BingoNewGameProps) {
   const [marked, setMarked] = useState(GameNoneCells)
 
-  function selectGame(gameMode: GameMode) {
+  useEffect(() => {
     switch (gameMode) {
       case GameMode.L:
         setMarked(GameLCells)
@@ -46,13 +46,12 @@ export default function BingoNewGame({ onSelect }: BingoNewGameProps) {
         setMarked(GameNoneCells)
         break
     }
-    onSelect()
-  }
+  }, [gameMode])
 
   return (
-    <div className="w-full min-h-full flex flex-col mb-12 pl-8 bg-green-800">
-      <div className="w-full flex flex-row justify-center py-4">
-        <SelectGameMode onSelect={selectGame} />
+    <div className='w-full min-h-full flex flex-col mb-12 pl-8 bg-green-800'>
+      <div className='w-full flex flex-row justify-center py-4'>
+        <GameModeTitle gameMode={gameMode} />
       </div>
       <div>
         <Game variants={marked} />
@@ -61,26 +60,41 @@ export default function BingoNewGame({ onSelect }: BingoNewGameProps) {
   )
 }
 
-interface SelectGameModeProps {
-  onSelect: (gameMode: GameMode) => void
+interface TitleProps {
+  children: string
 }
 
-const SelectGameMode = ({ onSelect }: SelectGameModeProps) => {
+const Title = ({ children }: TitleProps) => {
   return (
-    <select
-      className="bg-white py-1 px-4 rounded-md"
-      onChange={(evt) => onSelect(parseInt(evt.target.value))}
-    >
-      <option value={GameMode.NONE}>Seleccionar Modo de Juego</option>
-      <option value={GameMode.L}>Jugar en L</option>
-      <option value={GameMode.HORIZONTAL}>Jugar en Horizontal</option>
-      <option value={GameMode.VERTICAL}>Jugar en Vertical</option>
-      <option value={GameMode.CORNERS}>Jugar en Cuatro esquinas</option>
-      <option value={GameMode.DIAGONAL}>Jugar en Diagonal</option>
-      <option value={GameMode.X}>Jugar en X</option>
-      <option value={GameMode.FULL}>Jugar en Completa</option>
-    </select>
+    <h2 className='text-2xl text-white font-bold text-center mb-4'>
+      {children}
+    </h2>
   )
+}
+
+interface GameModeTitleProps {
+  gameMode: GameMode
+}
+
+const GameModeTitle = ({ gameMode }: GameModeTitleProps) => {
+  switch (gameMode) {
+    case GameMode.L:
+      return <Title>Jugar en L</Title>
+    case GameMode.HORIZONTAL:
+      return <Title>Jugar en Horizontal</Title>
+    case GameMode.VERTICAL:
+      return <Title>Jugar en Vertical</Title>
+    case GameMode.CORNERS:
+      return <Title>Jugar en Cuatro esquinas</Title>
+    case GameMode.DIAGONAL:
+      return <Title>Jugar en Diagonal</Title>
+    case GameMode.X:
+      return <Title>Jugar en X</Title>
+    case GameMode.FULL:
+      return <Title>Jugar en Completa</Title>
+    default:
+      return <Title>Seleccionar Modo de Juego</Title>
+  }
 }
 
 const cells: { [key: string]: number[] } = {
@@ -95,7 +109,7 @@ interface TableRowProps {
   children: ReactElement[]
 }
 const TableRow = ({ children }: TableRowProps) => {
-  return <div className="w-100 flex flex-row">{children}</div>
+  return <div className='w-100 flex flex-row'>{children}</div>
 }
 
 interface TableCellProps {
@@ -106,7 +120,7 @@ const TableCell = ({ children, marked }: TableCellProps) => {
   return (
     <div
       className={`w-8 h-8 rounded-full justify-center items-center flex border-4 mr-2 mb-2 ${
-        marked ? "bg-green-600" : ""
+        marked ? 'bg-green-600' : ''
       }`}
     >
       {children}
@@ -119,7 +133,7 @@ interface GameLetterCellProps {
 
 const GameLetterCell = ({ children }: GameLetterCellProps) => {
   return (
-    <div className="w-8 h-8 rounded-full justify-center items-center bg-red-800 text-white border-yellow-400 flex border-4 mr-2 mb-2">
+    <div className='w-8 h-8 rounded-full justify-center items-center bg-red-800 text-white border-yellow-400 flex border-4 mr-2 mb-2'>
       {children}
     </div>
   )
@@ -131,9 +145,9 @@ interface GameVariantProps {
 
 export const GameVariant = ({ marked }: GameVariantProps) => {
   return (
-    <div className="flex items-center justify-center">
-      <div className="mb-6 border-2 p-4 border-gray-600 rounded-xl bg-white">
-        <div className="w-full flex flex-row border-b-2 boder-gray-600 mb-2">
+    <div className='flex items-center justify-center'>
+      <div className='mb-6 border-2 p-4 border-gray-600 rounded-xl bg-white'>
+        <div className='w-full flex flex-row border-b-2 boder-gray-600 mb-2'>
           <GameLetterCell>B</GameLetterCell>
           <GameLetterCell>I</GameLetterCell>
           <GameLetterCell>N</GameLetterCell>
@@ -159,7 +173,7 @@ interface GameProps {
 }
 const Game = ({ variants }: GameProps) => {
   return (
-    <div className="w-full grid grid-cols-2">
+    <div className='w-full grid grid-cols-2'>
       {variants.map((marked) => (
         <GameVariant marked={marked} />
       ))}
