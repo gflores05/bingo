@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react'
-import { initializeApp } from 'firebase/app'
-import { doc, getFirestore, onSnapshot } from 'firebase/firestore'
-import BingoTable from '../../components/BingoTable'
-import { rows as initRows } from '../../constants'
-import BingoNewGame from '../BingoNewGame'
-import firebaseConfig from '../../firebaseConfig'
-import { GameMode } from '../../definitions'
+import { useEffect, useState } from "react"
+import { initializeApp } from "firebase/app"
+import { doc, getFirestore, onSnapshot } from "firebase/firestore"
+import BingoTable from "../../components/BingoTable"
+import { rows as initRows } from "../../constants"
+import BingoNewGame from "../BingoNewGame"
+import firebaseConfig from "../../firebaseConfig"
+import { GameMode } from "../../definitions"
+import BingoLastNumber from "../../components/BingoLastNumber"
 
 const app = initializeApp(firebaseConfig)
 
@@ -19,31 +20,36 @@ export default function BingoViewer() {
   } as { [key: string]: boolean[] })
 
   const [gameMode, setGameMode] = useState(GameMode.NONE)
+  const [lastNumber, setLastNumber] = useState("")
 
   // Initialize Cloud Firestore and get a reference to the service
   const db = getFirestore(app)
 
   useEffect(() => {
-    onSnapshot(doc(db, 'bingo', 'current'), (doc) => {
+    onSnapshot(doc(db, "bingo", "current"), (doc) => {
       if (!doc.exists()) {
         return
       }
 
       const data = doc.data()
 
-      if (!data || !data['B'].length) {
+      if (!data || !data["B"].length) {
         return
       }
 
-      setGameMode(data['type'] as GameMode)
+      setGameMode(data["type"] as GameMode)
+      setLastNumber(data["last"])
       setValues(data as { [key: string]: boolean[] })
     })
   }, [db])
 
   return (
-    <div className='w-full min-h-full flex flex-row items-stretch'>
+    <div className="w-full min-h-full flex flex-row items-stretch">
       <BingoNewGame gameMode={gameMode} />
-      <BingoTable values={values} rows={initRows} />
+      <div className="w-full flex flex-col">
+        <BingoLastNumber lastNumber={lastNumber} />
+        <BingoTable values={values} rows={initRows} />
+      </div>
     </div>
   )
 }
