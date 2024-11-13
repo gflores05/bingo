@@ -7,6 +7,7 @@ import BingoNewGame from "../BingoNewGame"
 import firebaseConfig from "../../firebaseConfig"
 import { GameMode } from "../../definitions"
 import BingoLastNumber from "../../components/BingoLastNumber"
+import BingoRaffleAnimation from "../../components/BingoRaffleAnimation"
 
 const app = initializeApp(firebaseConfig)
 
@@ -21,6 +22,7 @@ export default function BingoViewer() {
 
   const [gameMode, setGameMode] = useState(GameMode.NONE)
   const [lastNumber, setLastNumber] = useState("")
+  const [spinning, setSpinning] = useState(false)
 
   // Initialize Cloud Firestore and get a reference to the service
   const db = getFirestore(app)
@@ -39,6 +41,7 @@ export default function BingoViewer() {
 
       setGameMode(data["type"] as GameMode)
       setLastNumber(data["last"])
+      setSpinning(data["spinning"])
       setValues(data as { [key: string]: boolean[] })
     })
   }, [db])
@@ -46,7 +49,8 @@ export default function BingoViewer() {
   return (
     <div className="w-full min-h-full flex flex-row items-stretch">
       <BingoNewGame gameMode={gameMode} />
-      <div className="w-full flex flex-col">
+      <div className="w-full flex flex-col relative">
+        {spinning && <BingoRaffleAnimation />}
         <BingoLastNumber lastNumber={lastNumber} />
         <BingoTable values={values} rows={initRows} />
       </div>
